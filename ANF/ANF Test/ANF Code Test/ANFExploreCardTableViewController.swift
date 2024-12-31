@@ -12,7 +12,7 @@ class ANFExploreCardTableViewController: UITableViewController {
         super.viewDidLoad()
         tableView.register(UINib(nibName: ProductCardTC.identifire, bundle: nil), forCellReuseIdentifier:  ProductCardTC.identifire)
         tableView.rowHeight = UITableView.automaticDimension
-        tableView.estimatedRowHeight = 300
+        tableView.estimatedRowHeight = 400
         
         fetchData()
     }
