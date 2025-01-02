@@ -15,7 +15,7 @@ class ProductCardTC: UITableViewCell {
     @IBOutlet weak var promoMsgLbl: UILabel!
     @IBOutlet weak var bottomDecriptionLbl: UILabel!
     @IBOutlet weak var buttonStackVw: UIStackView!
-    @IBOutlet weak var productImgVwAsceptRatioConstrain: NSLayoutConstraint!
+    @IBOutlet weak var productImgVwHeightConstrain: NSLayoutConstraint!
     
     // MARK: - Intilizer
     static let identifire = "ProductCardTC"
@@ -26,6 +26,9 @@ class ProductCardTC: UITableViewCell {
     }
     
     func setupView() {
+        self.productImgVw.image = UIImage(named: "anf-US-20160601-app-men-spotlight")
+        
+        
         topDecriptionLbl.font = .systemFont(ofSize: 13)
         titleLbl.font = .boldSystemFont(ofSize: 17)
         promoMsgLbl.font = .systemFont(ofSize: 11)
@@ -39,13 +42,7 @@ class ProductCardTC: UITableViewCell {
     }
     
     func configure(with product: ProductCard) {
-        if let url = URL(string: product.backgroundImage ?? "") {
-             ImageLoader.shared.loadAsyncImage(from: url, completion: { image in
-                 self.productImgVw.image = image
-                 self.setProductImage(with: image)
-            })
-            
-        }
+        
         
         topDecriptionLbl.text = product.topDescription ?? ""
         titleLbl.text = product.title ?? ""
@@ -73,24 +70,30 @@ class ProductCardTC: UITableViewCell {
             
         })
         
+        if let url = URL(string: product.backgroundImage ?? "") {
+             ImageLoader.shared.loadAsyncImage(from: url, completion: { image in
+                 self.setProductImage(with: image)
+                 
+            })
+            
+        }
+        
     }
     
     func setProductImage(with image: UIImage) {
         
-        if let aspectRationConstrain = self.productImgVwAsceptRatioConstrain {
-            self.productImgVw.removeConstraint(aspectRationConstrain)
+        
+        let aspectRatio = image.size.height / image.size.width
+        let newHeight = (UIScreen.main.bounds.width) * aspectRatio
+        self.productImgVwHeightConstrain.constant = newHeight
+        
+        self.productImgVw.image = image
+        UIView.animate(withDuration: 0.3) {
+            self.setNeedsLayout()
+            self.setNeedsUpdateConstraints()
+            self.updateConstraints()
         }
         
-        let aspectRatio = image.size.width / image.size.height
-        if aspectRatio.isFinite {
-            productImgVwAsceptRatioConstrain = self.productImgVw.widthAnchor.constraint(equalTo: self.productImgVw.heightAnchor, multiplier: aspectRatio)
-        } else {
-            productImgVwAsceptRatioConstrain = self.productImgVw.widthAnchor.constraint(equalTo: self.productImgVw.heightAnchor, multiplier: 1)
-        }
-       
-        
-        productImgVwAsceptRatioConstrain.isActive = true
-        setNeedsLayout()
         
     }
    

@@ -4,42 +4,61 @@
 //
 
 import UIKit
+import Combine
 
 class ANFExploreCardTableViewController: UITableViewController {
-    private var productData: [ProductCard] = []
+    private let viewModel = ProductViewModel()
+    private var cancellables = Set<AnyCancellable>()
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        tableView.register(UINib(nibName: ProductCardTC.identifire, bundle: nil), forCellReuseIdentifier:  ProductCardTC.identifire)
-        tableView.rowHeight = UITableView.automaticDimension
-        tableView.estimatedRowHeight = 400
+        tableView.register(UINib(nibName: ProductCardTC.identifire, bundle: nil), forCellReuseIdentifier: ProductCardTC.identifire)
+       fetchProducts()
         
-        fetchData()
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(refreshPromotions),
+            name: UIApplication.willEnterForegroundNotification,
+            object: nil
+        )
     }
     
-    private func fetchData() {
-        ProductCardService.shared.fetchPromotions { [weak self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let products):
-                    self?.productData = products
+    private func fetchProducts() {
+        viewModel.fetchProducts { [weak self] error in
+            if let error = error {
+                self?.showErrorAlert(message: error.localizedDescription)
+            } else {
+                DispatchQueue.main.async {
                     self?.tableView.reloadData()
-                case .failure(let error):
-                    print("Error fetching promotions: \(error)")
                 }
             }
         }
     }
     
+    @objc private func refreshPromotions() {
+       fetchProducts()
+    }
+    
+    private func showErrorAlert(message: String) {
+        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
+    }
+    
+    override func numberOfSections(in tableView: UITableView) -> Int {
+        return 1
+    }
+    
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return self.productData.count
+        return viewModel.products.count
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: ProductCardTC.identifire, for: indexPath) as? ProductCardTC else {
             return UITableViewCell()
         }
-        cell.configure(with: self.productData[indexPath.row])
+        let product = viewModel.products[indexPath.row]
+        cell.configure(with: product)
         return cell
         
 //        let cell = self.tableView.dequeueReusableCell(withIdentifier: "exploreContentCell", for: indexPath)
@@ -53,7 +72,6 @@ class ANFExploreCardTableViewController: UITableViewController {
 //           let image = UIImage(named: name) {
 //            imageView.image = image
 //        }
-        
-        return cell
+
     }
 }

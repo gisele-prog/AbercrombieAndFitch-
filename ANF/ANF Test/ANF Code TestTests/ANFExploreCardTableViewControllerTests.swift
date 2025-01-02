@@ -10,9 +10,11 @@ import XCTest
 class ANFExploreCardTableViewControllerTests: XCTestCase {
 
     var testInstance: ANFExploreCardTableViewController!
+
     
     override func setUp() {
         testInstance = UIStoryboard(name: "Main", bundle: Bundle.main).instantiateInitialViewController() as? ANFExploreCardTableViewController
+        testInstance.loadViewIfNeeded()
     }
 
     func test_numberOfSections_ShouldBeOne() {
