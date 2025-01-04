@@ -4,15 +4,16 @@
 //
 
 import UIKit
-import Combine
 
 class ANFExploreCardTableViewController: UITableViewController {
-    private let viewModel = ProductViewModel()
-    private var cancellables = Set<AnyCancellable>()
+     let viewModel = ProductViewModel()
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.register(UINib(nibName: ProductCardTC.identifire, bundle: nil), forCellReuseIdentifier: ProductCardTC.identifire)
+        tableView.rowHeight = UITableView.automaticDimension
+        tableView.estimatedRowHeight = 500
        fetchProducts()
         
         NotificationCenter.default.addObserver(
@@ -22,6 +23,7 @@ class ANFExploreCardTableViewController: UITableViewController {
             object: nil
         )
     }
+    
     
     private func fetchProducts() {
         viewModel.fetchProducts { [weak self] error in
@@ -58,20 +60,10 @@ class ANFExploreCardTableViewController: UITableViewController {
             return UITableViewCell()
         }
         let product = viewModel.products[indexPath.row]
-        cell.configure(with: product)
+        cell.configure(with: product) { [weak self] in
+            guard let self = self else { return  }
+            self.tableView.reloadRows(at: [indexPath], with: .none)
+        }
         return cell
-        
-//        let cell = self.tableView.dequeueReusableCell(withIdentifier: "exploreContentCell", for: indexPath)
-//        if let titleLabel = cell.viewWithTag(1) as? UILabel,
-//           let titleText = exploreData?[indexPath.row]["title"] as? String {
-//            titleLabel.text = titleText
-//        }
-//        
-//        if let imageView = cell.viewWithTag(2) as? UIImageView,
-//           let name = exploreData?[indexPath.row]["backgroundImage"] as? String,
-//           let image = UIImage(named: name) {
-//            imageView.image = image
-//        }
-
     }
 }

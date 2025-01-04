@@ -13,11 +13,12 @@ struct ProductCard: Codable {
     var backgroundImage: String?
     var content: [Content]?
     var promoMessage, topDescription, bottomDescription: String?
+    // MARK: - Content
+    struct Content: Codable {
+        var target: String?
+        var title, elementType: String?
+    }
 }
 
-// MARK: - Content
-struct Content: Codable {
-    var target: String?
-    var title, elementType: String?
-}
+
 

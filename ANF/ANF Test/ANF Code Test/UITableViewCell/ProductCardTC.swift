@@ -41,7 +41,7 @@ class ProductCardTC: UITableViewCell {
         promoMsgLbl.textColor = .lightGray
     }
     
-    func configure(with product: ProductCard) {
+    func configure(with product: ProductCard, onLayoutUpdated: @escaping () -> Void) {
         
         
         topDecriptionLbl.text = product.topDescription ?? ""
@@ -72,28 +72,21 @@ class ProductCardTC: UITableViewCell {
         
         if let url = URL(string: product.backgroundImage ?? "") {
              ImageLoader.shared.loadAsyncImage(from: url, completion: { image in
-                 self.setProductImage(with: image)
+                 let aspectRatio = image.size.height / image.size.width
+                 let newHeight = self.contentView.frame.width * aspectRatio
+                 self.productImgVwHeightConstrain.constant = newHeight
+                 
+                 self.productImgVw.image = image
+                 UIView.animate(withDuration: 0.1) {
+                     self.setNeedsLayout()
+                     self.setNeedsUpdateConstraints()
+                     self.updateConstraints()
+                 }
+                 onLayoutUpdated()
                  
             })
             
         }
-        
-    }
-    
-    func setProductImage(with image: UIImage) {
-        
-        
-        let aspectRatio = image.size.height / image.size.width
-        let newHeight = (UIScreen.main.bounds.width) * aspectRatio
-        self.productImgVwHeightConstrain.constant = newHeight
-        
-        self.productImgVw.image = image
-        UIView.animate(withDuration: 0.3) {
-            self.setNeedsLayout()
-            self.setNeedsUpdateConstraints()
-            self.updateConstraints()
-        }
-        
         
     }
    
