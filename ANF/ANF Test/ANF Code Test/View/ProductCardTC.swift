@@ -16,41 +16,38 @@ class ProductCardTC: UITableViewCell {
     @IBOutlet weak var bottomDecriptionLbl: UILabel!
     @IBOutlet weak var buttonStackVw: UIStackView!
     @IBOutlet weak var productImgVwHeightConstrain: NSLayoutConstraint!
-    
+
     // MARK: - Intilizer
-    static let identifire = "ProductCardTC"
-    
+    static let identifier = "ProductCardTC"
+
     override func awakeFromNib() {
         super.awakeFromNib()
         self.setupView()
     }
-    
+
     func setupView() {
         self.productImgVw.image = UIImage(named: "anf-US-20160601-app-men-spotlight")
-        
-        
+
         topDecriptionLbl.font = .systemFont(ofSize: 13)
         titleLbl.font = .boldSystemFont(ofSize: 17)
         promoMsgLbl.font = .systemFont(ofSize: 11)
         bottomDecriptionLbl.font = .systemFont(ofSize: 13)
-        
+
         buttonStackVw.spacing = 8
-        
+
         topDecriptionLbl.textColor = .darkGray
         titleLbl.textColor = .black
         promoMsgLbl.textColor = .lightGray
     }
-    
+
     func configure(with product: ProductCard, onLayoutUpdated: @escaping () -> Void) {
-        
-        
         topDecriptionLbl.text = product.topDescription ?? ""
         titleLbl.text = product.title ?? ""
         promoMsgLbl.text = product.promoMessage ?? ""
         self.setBottomDescriptionText(product.bottomDescription)
-        
-        buttonStackVw.arrangedSubviews.forEach{ $0.removeFromSuperview() }
-        product.content?.forEach({ item in
+
+        buttonStackVw.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        product.content?.forEach { item in
             let button = UIButton(type: .system)
             button.setTitle(item.title, for: UIControl.State())
             button.titleLabel?.font = .systemFont(ofSize: 15)
@@ -60,37 +57,38 @@ class ProductCardTC: UITableViewCell {
             button.layer.borderWidth = 1.5
             button.addAction(UIAction { _ in
                 if let url = URL(string: item.target ?? "") {
-                        debugPrint(url)
+                    debugPrint(url)
                     UIApplication.shared.open(url)
                 }
-                
             }, for: .touchUpInside)
-            
+
             buttonStackVw.addArrangedSubview(button)
-            
-        })
-        
-        if let url = URL(string: product.backgroundImage ?? "") {
-             ImageLoader.shared.loadAsyncImage(from: url, completion: { image in
-                 let aspectRatio = image.size.height / image.size.width
-                 let newHeight = self.contentView.frame.width * aspectRatio
-                 self.productImgVwHeightConstrain.constant = newHeight
-                 
-                 self.productImgVw.image = image
-                 UIView.animate(withDuration: 0.1) {
-                     self.setNeedsLayout()
-                     self.setNeedsUpdateConstraints()
-                     self.updateConstraints()
-                 }
-                 onLayoutUpdated()
-                 
-            })
-            
         }
-        
+
+        if let url = URL(string: product.backgroundImage ?? "") {
+            ImageLoader.shared.loadAsyncImage(from: url) { [weak self] image in
+                guard let self = self, let image = image else {
+                    // Handle image loading failure
+                    self?.productImgVw.image = nil
+                    self?.productImgVwHeightConstrain.constant = 0
+                    return
+                }
+
+                let aspectRatio = image.size.height / image.size.width
+                let newHeight = self.contentView.frame.width * aspectRatio
+                self.productImgVwHeightConstrain.constant = newHeight
+
+                self.productImgVw.image = image
+                UIView.animate(withDuration: 0.1) {
+                    self.setNeedsLayout()
+                    self.setNeedsUpdateConstraints()
+                    self.updateConstraints()
+                }
+                onLayoutUpdated()
+            }
+        }
     }
-   
-    
+
     func setBottomDescriptionText(_ text: String?) {
         guard let text = text else {
             bottomDecriptionLbl.text = nil
@@ -98,28 +96,27 @@ class ProductCardTC: UITableViewCell {
         }
         if let attributedText = convertHTMLToAttributedString(html: text) {
             bottomDecriptionLbl.attributedText = attributedText
-            
         } else {
             bottomDecriptionLbl.text = text
         }
     }
-    
+
     /// Convert HTML string to an attributed string
     private func convertHTMLToAttributedString(html: String) -> NSAttributedString? {
         guard let data = html.data(using: .utf8) else { return nil }
         do {
-            
-            let attributedString = try NSMutableAttributedString( data: data, options: [.documentType: NSAttributedString.DocumentType.html,
-                                                                             .characterEncoding: String.Encoding.utf8.rawValue], documentAttributes: nil )
-            
-            //attributedString.addAttribute(.foregroundColor, value: UIColor.lightGray, range: NSRange(location: 0, length: attributedString.length))
-            
+            let attributedString = try NSMutableAttributedString(
+                data: data,
+                options: [
+                    .documentType: NSAttributedString.DocumentType.html,
+                    .characterEncoding: String.Encoding.utf8.rawValue
+                ],
+                documentAttributes: nil
+            )
             return attributedString
         } catch {
             print("Error converting HTML to NSAttributedString: \(error)")
             return nil
         }
     }
-    
-    
 }

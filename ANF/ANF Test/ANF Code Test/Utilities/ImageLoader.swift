@@ -14,17 +14,19 @@ class ImageLoader {
 
     private init() {}
 
-    func loadAsyncImage(from url: URL,completion: @escaping (UIImage) -> Void) {
+    func loadAsyncImage(from url: URL, completion: @escaping (UIImage?) -> Void) {
         // Check the cache
         if let cachedImage = cache.object(forKey: url as NSURL) {
-            //imageView.image = cachedImage
             completion(cachedImage)
             return
         }
 
         // Download the image
         let task = URLSession.shared.dataTask(with: url) { [weak self] data, _, error in
-            guard let self = self, let data = data, let image = UIImage(data: data), error == nil else {
+            guard let self = self, error == nil, let data = data, let image = UIImage(data: data) else {
+                DispatchQueue.main.async {
+                    completion(nil) // Return nil if loading fails
+                }
                 return
             }
 
@@ -33,10 +35,10 @@ class ImageLoader {
 
             // Set the image on the main thread
             DispatchQueue.main.async {
-               completion(image)
+                completion(image)
             }
         }
-        task.priority = URLSessionTask.highPriority // Increase download priority
+        task.priority = URLSessionTask.highPriority // Set high priority for the task
         task.resume()
     }
 }
