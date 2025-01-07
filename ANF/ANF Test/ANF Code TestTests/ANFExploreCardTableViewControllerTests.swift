@@ -1,9 +1,3 @@
-//
-//  ANF_Code_TestTests.swift
-//  ANF Code TestTests
-//
-
-
 import XCTest
 @testable import ANF_Code_Test
 

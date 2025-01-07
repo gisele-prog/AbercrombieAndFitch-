@@ -1,10 +1,3 @@
-//
-//  ProductsViewModelTests.swift
-//  ANF Code TestTests
-//
-//  Created by joie gisele mukamisha on 1/2/25.
-//
-
 import XCTest
 @testable import ANF_Code_Test
 

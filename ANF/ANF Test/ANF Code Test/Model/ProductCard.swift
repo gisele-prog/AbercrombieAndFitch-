@@ -1,10 +1,3 @@
-//
-//  ProductCard.swift
-//  ANF Code Test
-//
-//  Created by joie gisele mukamisha on 12/29/24.
-//
-
 import Foundation
 
 // MARK: - ProductCardElement
@@ -19,6 +12,3 @@ struct ProductCard: Codable {
         var title, elementType: String?
     }
 }
-
-
-

@@ -1,10 +1,3 @@
-//
-//  ProductCardService.swift
-//  ANF Code Test
-//
-//  Created by joie gisele mukamisha on 12/29/24.
-//
-
 import Foundation
 
 // Custom Error enum for better error handling
